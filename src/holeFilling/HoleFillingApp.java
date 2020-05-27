@@ -19,23 +19,26 @@ public class HoleFillingApp {
 		int z = Integer.parseInt(args[1]); 
 		float e = Float.parseFloat(args[2]); 
 		int connectivityType = Integer.parseInt(args[3]); 
-		
+
 		//Set configuration:
 		config.setPathToOutputDir(createOutputFolder(file));
-		
+
 		Mat image = loadImage(file);
-		//Normalize to range [0 1]
-		normalize(image);
+
 		config.setInputImg(image);
 		config.setZ(z);
 		config.setEps(e);
 		config.setConnectType(connectivityType);
-		
+
 		//May accept (and write to) RGB image formats, and perform the required conversions:
 		if (args.length == 5) {
 			String maskFile = args[4];
 			Mat mask = loadImage(maskFile);
 			//Convert to grayscale format with hole value -1
+			image.convertTo(image, CvType.CV_32FC3);
+			//Normalize to range [0 1]
+			Core.normalize(image, image, 0.0, 255.0, Core.NORM_MINMAX);
+			//normalize(image);
 			config.setInputImg(convertFromRBGwithMask(image,mask));
 			String aftermask = config.getPathToOutputDir() + "/imageWithMask.jpg"; 
 			writeImage(aftermask, image);
@@ -56,13 +59,13 @@ public class HoleFillingApp {
 		Mat image = imageCodecs.imread(file, Imgcodecs.IMREAD_GRAYSCALE);
 		return image;
 	}
-	
+
 	private static void writeImage(String file, Mat img) {
 		Imgcodecs imageCodecs = new Imgcodecs(); 
 		imageCodecs.imwrite(file, img);
 	}
-	
-	
+
+
 	private static String createOutputFolder(String path) {
 		String[] parts = path.split("/");
 		String pathToDir = parts[0];
@@ -71,14 +74,20 @@ public class HoleFillingApp {
 		}
 		pathToDir += "/Output";
 		File dir = new File(pathToDir );
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        return pathToDir;
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+		return pathToDir;
 	}
-	
+
 	private static void normalize(Mat img) {
-		img.convertTo(img, CvType.CV_32FC3, 1.0/255.0);
+		for (int i = 0; i < img.rows(); i++) {
+			for (int j = 0; j < img.cols(); j++) {
+				float value = (float) img.get(i,j)[0];
+				img.put(i, j, (value/255.0));
+			}
+		}
+		//img.convertTo(img, CvType.CV_32FC3, 1.0/255.0);
 	}
 
 	public static void main(String[] args) {

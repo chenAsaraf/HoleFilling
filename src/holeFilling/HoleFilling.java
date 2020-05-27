@@ -41,7 +41,7 @@ public class HoleFilling {
 		//Iterates over the image:
 		for (int i = 0; i < input.rows(); i++) {
 			for (int j = 0; j < input.cols(); j++) {
-				if(input.get(i, j)[0] == -1.0) {
+				if(input.get(i, j)[0] < 0) {
 					return new Pixel(i,j);
 				}
 			}
@@ -75,7 +75,7 @@ public class HoleFilling {
 			Pixel current = holeQue.poll();
 			for(Pixel n : neighbor(current)) {
 				if(!visited.contains(n)) {
-					if (input.get(n.row, n.col)[0] == -1.0) {
+					if (input.get(n.row, n.col)[0] < 0) {
 						H.add(n);
 						holeQue.add(n);
 						visited.add(n);
