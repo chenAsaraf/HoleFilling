@@ -2,7 +2,7 @@
 
 ## To Run The Program:
 - Make sure that the OpenCV library is installed
-- Run the "HoleFillingApp" for command line utiliy, with the following inputs: 
+- Run the "HoleFillingApp" for command line utility, with the following inputs: 
 
       1. Input grayscale image, with -1 marking a missing color
          or RGB image with the addition of the fifth argument to mark the hole
