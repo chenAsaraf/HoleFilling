@@ -27,7 +27,7 @@ import org.opencv.imgcodecs.Imgcodecs;
  *     The missing pixels in the image are the pixels marked as 1 in the mask.
  */
 
-public class HoleFillingApp {
+public class CMDUtils {
 	
 	public static void main(String[] args) {
 		//Loading the OpenCV core library  
