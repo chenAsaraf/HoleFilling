@@ -2,17 +2,54 @@ package holeFilling;
 
 import java.io.File;
 import java.util.InputMismatchException;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 
+/**
+ *  Command Line Utility:
+ *  
+ *  Accepts the input in the following order:
+ *  
+ *  1. Input grayscale image, with -1 marking a missing color
+ *     or RGB image with the addition of the fifth argument to mark the hole
+ *      
+ *  2. "Z" configuration - an integer
+ *  
+ *  3. "Epsilon" configuration -  a small float number
+ *  
+ *  4. Connectivity type - Integer, 4 or 8
+ *  
+ *  5. Optional - extra RGB mask-image to defines the hole. 
+ *     Required in case of input which is RGB image
+ *     The missing pixels in the image are the pixels marked as 1 in the mask.
+ */
+
 public class HoleFillingApp {
+	
+	public static void main(String[] args) {
+		//Loading the OpenCV core library  
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
+		//Store the configuration details during parsing:
+		Configuration conf = new Configuration();
+		ParseArgsToObjects(args,conf);
+		System.out.println("arguments loaded");
+		//Start to fill and inpaint the hole in the image:
+		HoleFiller filler = new HoleFiller(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
+		Mat result = filler.fill();
+		//Write the new image:
+		String newfile = conf.getPathToOutputDir() +"/newfile.jpg";
+		writeImage(newfile, result);
+		System.out.println("image's hole repainted");
+	}
+
+	
 
 	/**
-	 * Auxiliary function to use the command line utility 
+	 * Auxiliary function to parse command line arguments and store the information 
+	 * for use next 
 	 * @param args
 	 * @param config - structure holds the information of the inputs
 	 */
@@ -60,6 +97,11 @@ public class HoleFillingApp {
 		return image;
 	}
 
+	/**
+	 * Read image from path and store it in OpenCv::Mat Object 
+	 * @param file
+	 * @return image Mat
+	 */
 	private static Mat loadImage(String file) {
 		//Instantiating the Imagecodecs class 
 		Imgcodecs imageCodecs = new Imgcodecs(); 
@@ -68,12 +110,18 @@ public class HoleFillingApp {
 		return image;
 	}
 
+	/**
+	 * Write the image into path
+	 * @param file
+	 * @param img
+	 */
 	private static void writeImage(String file, Mat img) {
 		Imgcodecs imageCodecs = new Imgcodecs(); 
 		imageCodecs.imwrite(file, img);
 	}
 
-
+	
+	//Create output folder to examine the results
 	private static String createOutputFolder(String path) {
 		String[] parts = path.split("/");
 		String pathToDir = parts[0];
@@ -86,22 +134,6 @@ public class HoleFillingApp {
 			dir.mkdir();
 		}
 		return pathToDir;
-	}
-
-	public static void main(String[] args) {
-		//Loading the OpenCV core library  
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
-		//Store the configuration details during parsing:
-		Configuration conf = new Configuration();
-		ParseArgsToObjects(args,conf);
-		System.out.println("arguments loaded");
-		//Start to fill and inpaint the hole in the image:
-		HoleFiller filler = new HoleFiller(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
-		Mat result = filler.fill();
-		//Write the new image:
-		String newfile = conf.getPathToOutputDir() +"/newfile.jpg";
-		writeImage(newfile, result);
-		System.out.println("image's hole repainted");
 	}
 
 }

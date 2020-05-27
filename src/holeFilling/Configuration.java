@@ -4,7 +4,8 @@ import org.opencv.core.Mat;
 
 public class Configuration {
 	/** Structure that store the HoleFilling library settings
-	     during the argument parsing in command line utility **/
+	     during the argument parsing, used by Command Line utility **/
+	
 	private String PathToOutputDir;
 	private int z;
 	private float eps;

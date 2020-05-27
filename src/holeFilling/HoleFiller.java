@@ -17,12 +17,22 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;           
 
+/**
+ * Class to perform the algorithmic operations of filling the hole in the image
+ * The class support filling holes in grayscale images, 
+ * where each pixel value is a ​float​ in the range ​[0, 1]​,
+ * and hole (missing) values which are marked with the value ​-1​. 
+ * 
+ * User manual:
+ * 1. Initialize HoleFiller object with details:
+ *    HoleFiller filler = new HoleFiller(z, epsilon, input, connectivityType);
+ * 2. Activate the filler, store the result in OpenCv::Mat to allow further
+ *    image processing:
+ *    Mat result = filler.fill();
+ */
 
 public class HoleFiller {
 
-	/**
-	 * Class to perform the algorithmic operations of filling the hole in the image
-	 */
 	protected WeightFunc w;
 	private Mat input;
 	private int connectType;
@@ -30,11 +40,19 @@ public class HoleFiller {
 	private Set<Pixel> borders;
 
 	public HoleFiller(int z, float e, Mat src, int cType) {
-		w = new WeightFunc(z, e);
+		if(src.channels() > 1)
+			throw new InputMismatchException("Image should be in grayscale");
 		Imgcodecs imageCodecs = new Imgcodecs(); 
 		//Reading the Image from the file  
 		input = src;
+		
+		w = new DeafultWeight(z, e);
+		
+		
+		if ((cType!= 4) && (cType!=8))
+			throw new InputMismatchException("HoleFiller accept only 4 or 8 connectivity Type");
 		connectType = cType;
+		
 		hole = new Vector<>();
 		borders = new HashSet<>();
 	}
@@ -131,7 +149,7 @@ public class HoleFiller {
 			for(Pixel border: borders) {
 				//TODO - if the type already float no need in conversion 
 				float b_value = (float) input.get(border.row(), border.col())[0];
-				float weight = WeightFunc.w(hole.get(i),border);
+				float weight = w.func(hole.get(i),border);
 				//TODO - maybe () operator in WeightFunc(h,b)
 				sumWithValues += weight*b_value;
 				sumDistances += weight;
@@ -169,7 +187,7 @@ public class HoleFiller {
 	
 		public void findHoleNBoundries() {
 			Pixel first = findFirstHole();
-			if(first.equals(-1,-1)) throw new InputMismatchException("There is no hole in the image");
+			if(first.equals(-1,-1)) return; //No need to repaint 
 			hole.add(first);
 			Set<Pixel> visited = new HashSet();
 			Queue<Pixel> holeQue = new LinkedList<>();
