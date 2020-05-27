@@ -140,7 +140,7 @@ public class HoleFinder{
 	}
 
 	/**
-	 * Find only colored neighbor
+	 * Find only colored neighborhood of the input pixel,
 	 * @param current
 	 * @param connectType
 	 * @param input
@@ -170,6 +170,44 @@ public class HoleFinder{
 				Pixel borderPix = new Pixel(newRowIndex, newColIndex);
 				if(!outOfImageBorders(borderPix, input.rows(), input.width())) {
 					if(input.get(newRowIndex, newColIndex)[0] > 0) //If the pixel colored
+						neig.add(borderPix);
+				}
+			}
+		}
+		return neig;
+	}
+
+	/**
+	 * Find only missing neighborhood of the input pixel
+	 * @param current
+	 * @param connectType
+	 * @param input
+	 * @return
+	 */
+	public static ArrayList<Pixel> unColorNeighbor(Pixel current, int connectType, Mat input) {
+		ArrayList<Pixel> neig = new ArrayList<>();
+		int r = current.row();
+		int c = current.col();
+		int[][] indexes = {{r+1,c}, {r-1,c}, {r,c+1}, {r,c-1}};
+		//First for each edge-connected pixel:
+		for (int i = 0; i < indexes.length; i++) {
+			int newRowIndex = indexes[i][0];
+			int newColIndex = indexes[i][1];
+			Pixel borderPix = new Pixel(newRowIndex, newColIndex);
+			if(!outOfImageBorders(borderPix, input.rows(), input.width())) {
+				if(input.get(newRowIndex, newColIndex)[0] < 0) //If the pixel colored
+					neig.add(borderPix);
+			}
+		}
+		//Later if connectivity-type is 8: add the corners-pixels
+		if(connectType == 8) {
+			int [][] cornerIdx = {{r+1,c+1}, {r-1,c-1}, {r+1,c-1}, {r-1,c+1}};
+			for (int i = 0; i < cornerIdx.length; i++) {
+				int newRowIndex = cornerIdx[i][0];
+				int newColIndex = cornerIdx[i][1];
+				Pixel borderPix = new Pixel(newRowIndex, newColIndex);
+				if(!outOfImageBorders(borderPix, input.rows(), input.width())) {
+					if(input.get(newRowIndex, newColIndex)[0] < 0) //If the pixel colored
 						neig.add(borderPix);
 				}
 			}
