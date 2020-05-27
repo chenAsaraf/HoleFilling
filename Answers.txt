@@ -1,0 +1,86 @@
+Solution to the Questions:
+
+# ---------- Question 1 ---------- # 
+If there are m boundary pixels and n pixels inside the hole,
+what’s the complexity of the algorithm that fills the hole,
+assuming that the hole and boundary were already found? 
+Try to also express the complexity only in terms of n.
+
+Answer:
+The complexity of the algorithm as introduced is O(n*m).
+This is because for each missing pixel (quantity of n),
+its weight with each pixel at the border- must be summed (quantity of m).
+For each missing-pixel it's a different sum, hence, time-complexity is 
+O(n*m) as stated.
+
+Note that the border is all pixels that are connected to missing-pixels,
+but not missing themselves. Therefore, in general, for each missing pixel 
+we have maximum 8 / 4 border pixel, respectively to the connectivity type
+(in case that the hole is more then 1 pixel, and it's all pixels connected, the number is much less). 
+Hence, we can express m by n: m = O(connectivity-type * n).
+
+In conclusion, complexity time only in terms of n:
+O(m*n) = O(C*n*n) = O(n^2) , where C = constant of connectivity-type.
+
+
+# ---------- Question 2 ---------- # 
+Describe an algorithm that approximates the result in O(n) to a high degree of accuracy.
+As a bonus, implement the suggested algorithm in your library in addition to the algorithm
+described above. 
+
+Answer:
+To achieve time complexity of O(n), we have to get rid of the inner loop through all
+the borders pixel. That is, we need to execute for each missing-pixel a fix number
+of actions that do not depends on the number of pixels in the border.
+
+First suggestion: 
+Take middle-hole pixel, define its intensity to be as the basic algorithm suggest,
+and determine all the missing pixels for the same intensity.
+This creates a kind of average in pixels intensity, the runtime is O(m+n) which is 
+O(n+n) = o(n) as noted above, but the result is NOT in a high degree of accuracy.
+
+Second suggestion:
+If we had to fill the missing-pixels using only fixed number of colored pixels to
+"copy " from them the color, we should choose the CLOSEST ones to the current missing-pixel.
+The problem now is to keep track of this closest ones.
+
+Hence we can do the following:
+
+Define inner border of the hole: missing pixels that touches at list one colored pixel. 
+Fill the pixels in the inner-border using only there closest (connected) colored pixels. 
+Now we have new border and we can repeat the process.
+
+Because we expect that each pixel intensity is not much different from its surroundings,
+the effect of the pixels closest to it is highest, so we can "abandon" the pixels at the
+far border. So high degree of accuracy achieved.
+
+Time complexity:
+Fill inner-border - O(|closest-pixels|*|inner-border|) = O(|inner-border|) 
+Find new inner-border: O(n-|last-inner-border|)
+In conclusion: O(n)
+
+
+0. Create HashMap<Pixel, ListOfPixels> innerBorder to store all missing pixels in the inner border,
+	with there outer border neighbors list
+   Create HashSet of hole- other missing pixels. 
+
+Initialize :
+1. Go over all pixels in the image:
+	2. If current pixel intensity == -1:
+		3. Create a list of all pixel's neighbors that are not missing
+		4. If neighborhood size > 0:
+			5. innerBorder add(current,neighborhood)
+		5. Else hole add(current)
+		
+Fill innerBorder iteration:9n
+6. While hole is not empty: 
+	7. Fill the innerBorder pixels using only the pixels in its neighbors list //O(1) for each pixel 
+	8. Clean innerBorder
+	9. for each pixel p in the  hole: //O(n-|innerBorder|) 
+		10. Create a list of all p neighbors that are not missing
+		11. If neighborhood size > 0:
+			12. innerBorder add(p,neighborhood)
+			13. remove p from the hole
+		 
+
+ 
