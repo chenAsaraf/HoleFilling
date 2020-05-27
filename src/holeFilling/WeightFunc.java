@@ -15,12 +15,12 @@ public class WeightFunc {
 	
 	
 	// Assigns a non-negative float weight to a pair of two pixel coordinates
-	public static float weighting(Pixel u, Pixel v) {
+	public static float w(Pixel u, Pixel v) {
 		return (float)(1/(Math.pow(euclideanDistance(u,v), z) + epsilon));
 	}
 	
 	private static double euclideanDistance(Pixel u, Pixel v) {
-		return Math.sqrt(Math.pow(u.col-v.col,2) + Math.pow(u.row-v.row,2));
+		return Math.sqrt(Math.pow(u.col()-v.col(),2) + Math.pow(u.row()-v.row(),2));
 	}
 	
 	 

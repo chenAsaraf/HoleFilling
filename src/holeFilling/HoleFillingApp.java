@@ -11,6 +11,11 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 public class HoleFillingApp {
 
+	/**
+	 * Auxiliary function to use the command line utility 
+	 * @param args
+	 * @param config - structure holds the information of the inputs
+	 */
 	public static void ParseArgsToObjects(String[] args, Configuration config) {
 		if (args.length < 4) throw new InputMismatchException("There are not enough arguments");
 		//TODO: add description of the input
@@ -24,8 +29,7 @@ public class HoleFillingApp {
 		config.setPathToOutputDir(createOutputFolder(file));
 
 		Mat image = loadImage(file);
-
-		config.setInputImg(image);
+		config.setInput(image);
 		config.setZ(z);
 		config.setEps(e);
 		config.setConnectType(connectivityType);
@@ -38,17 +42,21 @@ public class HoleFillingApp {
 			image.convertTo(image, CvType.CV_32FC3);
 			//Normalize to range [0 1]
 			Core.normalize(image, image, 0.0, 255.0, Core.NORM_MINMAX);
-			//normalize(image);
-			config.setInputImg(convertFromRBGwithMask(image,mask));
-			String aftermask = config.getPathToOutputDir() + "/imageWithMask.jpg"; 
-			writeImage(aftermask, image);
+			config.setInput(convertFromRBGwithMask(image,mask,config));
 		}
 	}
 
-	private static Mat convertFromRBGwithMask(Mat image, Mat mask) {
-		//Mask has intensity of 1 where the hole is
-		//Applying the mask to carve out the hole
-		image.setTo(new Scalar(-1,-1,-1),mask);
+	/**
+	 * Output a Mat object contains intensity of -1 in the hole pixels,
+	 * applying the mask to carve the hole
+	 * @param image - original image already in grayscale format and in Mat structure
+	 * @param mask - image containing 1 where pixels are missing (hole)
+	 * @return image
+	 */
+	private static Mat convertFromRBGwithMask(Mat image, Mat mask, Configuration config) {
+		image.setTo(new Scalar(-1.0),mask);
+		String aftermask = config.getPathToOutputDir() + "/imageWithMask.jpg"; 
+		writeImage(aftermask, image);
 		return image;
 	}
 
@@ -80,28 +88,20 @@ public class HoleFillingApp {
 		return pathToDir;
 	}
 
-	private static void normalize(Mat img) {
-		for (int i = 0; i < img.rows(); i++) {
-			for (int j = 0; j < img.cols(); j++) {
-				float value = (float) img.get(i,j)[0];
-				img.put(i, j, (value/255.0));
-			}
-		}
-		//img.convertTo(img, CvType.CV_32FC3, 1.0/255.0);
-	}
-
 	public static void main(String[] args) {
 		//Loading the OpenCV core library  
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
 		//Store the configuration details during parsing:
 		Configuration conf = new Configuration();
 		ParseArgsToObjects(args,conf);
+		System.out.println("arguments loaded");
 		//Start to fill and inpaint the hole in the image:
-		HoleFilling filler = new HoleFilling(conf.getZ(),conf.getEps(),conf.getInputImg(),conf.getConnectType());
-		filler.fill();
+		HoleFiller filler = new HoleFiller(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
+		Mat result = filler.fill();
 		//Write the new image:
 		String newfile = conf.getPathToOutputDir() +"/newfile.jpg";
-		writeImage(newfile, conf.getInputImg());
+		writeImage(newfile, result);
+		System.out.println("image's hole repainted");
 	}
 
 }

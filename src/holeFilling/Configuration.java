@@ -8,7 +8,7 @@ public class Configuration {
 	private String PathToOutputDir;
 	private int z;
 	private float eps;
-	private Mat inputImg;
+	private Mat input;
 	private int connectType;
 
 	public int getConnectType() {
@@ -19,12 +19,12 @@ public class Configuration {
 		this.connectType = connectType;
 	}
 
-	public Mat getInputImg() {
-		return inputImg;
+	public Mat getInput() {
+		return input;
 	}
 
-	public void setInputImg(Mat inputImg) {
-		this.inputImg = inputImg;
+	public void setInput(Mat input) {
+		this.input = input;
 	}
 
 	public int getZ() {
