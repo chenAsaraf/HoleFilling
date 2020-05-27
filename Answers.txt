@@ -59,6 +59,7 @@ Fill inner-border - O(|closest-pixels|*|inner-border|) = O(|inner-border|)
 Find new inner-border: O(n-|last-inner-border|)
 In conclusion: O(n)
 
+PseudoCode:
 
 0. Create HashMap<Pixel, ListOfPixels> innerBorder to store all missing pixels in the inner border,
 	with there outer border neighbors list
