@@ -33,7 +33,7 @@ Extends Filler. Implement the approximation algorithm.
 ### WeightFunc
 Interface to support difference weight function.
 
-## DefaultWeight
+### DefaultWeight
 Implement WeightFunc and store the default weighting function.
 
 ### HoleFinder
