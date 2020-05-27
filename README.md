@@ -17,3 +17,24 @@
          Required in case of input which is RGB image
          The missing pixels in the image are the pixels marked as 1 in the mask.
          
+## About the implementation:
+
+### Filler:
+Abstract class to represent variation of image hole-filler algorithms.
+Each filler algorithm must store the source image, a weighting  function and
+connectivity-type definition, and to implement "fill()" method. 
+
+### HoleFillerNaive
+Extends Filler. Implement the basic algorithm.
+
+### HoleFillerAprox
+Extends Filler. Implement the approximation algorithm.
+
+### WeightFunc
+Interface to support difference weight function.
+
+## DefaultWeight
+Implement WeightFunc and store the default weighting function.
+
+### HoleFinder
+Algorithmic class that stores methods to find a hole in given image.  
