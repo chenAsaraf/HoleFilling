@@ -87,5 +87,6 @@ Fill innerBorder iteration:
 				14. newBorder add(H,H.colored-neighbor)
 				15. remove H from the hole
 	16. innerBorder = newBorder
+ 
 
  

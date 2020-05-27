@@ -60,7 +60,6 @@ public class HoleFillerAprox extends Filler{
 				}
 				setValue(current,sumWithValues, sumDistances);
 			}
-			//			innerBorder.clear();
 			findNewInnerBorder();
 		}
 		return input;
