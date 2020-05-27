@@ -3,6 +3,8 @@ package holeFilling;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
@@ -11,75 +13,81 @@ import org.opencv.core.Mat;
 
 /***
  * Algorithmic class to find a hole in the image.
- * here implementation 
  */
-public class HoleFinder {
-
-
-	/**
-	 * Initialize the 'hole' and 'borders' pixel's group
-	 */
-//	public static void findHoleNBoundries(Mat input, Vector<Pixel> hole, Set<Pixel> borders, int connectType) {
-//		Set<Pixel> visited = new HashSet();
-//		for (int i = 0; i < input.rows(); i++) {
-//			for (int j = 0; j < input.cols(); j++) {
-//				if(input.get(i, j)[0] < 0) {
-//					Pixel current = new Pixel(i,j);
-//					hole.add(current);
-//					visited.add(current);
-//					for(Pixel n : neighbor(current,connectType,input.rows(), input.cols())) {
-//						if(!visited.contains(n)) {
-//							if (input.get(n.row(), n.col())[0] < 0) {
-//								hole.add(n);
-//								visited.add(n);
-//							}
-//							else {
-//								borders.add(n); 
-//								visited.add(n);
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-
-
-
+public class HoleFinder{
 
 	/**
 	 * Initialize the 'hole' and 'borders' pixel's group.
+	 * Definitions:
+	 * 'hole' : set of all the missing pixels,		
+	 * 'borders' : set of all pixels that connected to a hole pixel, but are not in the hole themselves
+	 *  
 	 * In order to reduce unnecessary pixel scanning in the image,
 	 * the method operate in the following way:
 	 * By assumption - the image has only a single hole and it connected.
 	 * Therefore in the moment we found a missing pixel, we can search only in its surrounding pixels,
 	 * to find other missing pixels. In the moments there is no new missing pixel to discover- we can stop.
+	 * 
+	 * @param input Mat
+	 * @param hole Set<Pixel>
+	 * @param borders Set<Pixel>
+	 * @param connectType int
 	 */
-		public static void findHoleNBoundries(Mat input, Vector<Pixel> hole, Set<Pixel> borders, int connectType) {
-			Pixel first = findFirstHole(input);
-			if(first.equals(-1,-1)) return; //No need to repaint 
-			hole.add(first);
-			Set<Pixel> visited = new HashSet(); //All visited pixels to avoid duplicate scanning
-			Queue<Pixel> holeQue = new LinkedList<>(); //Pixels that in scanning process 
-			holeQue.add(first);
-			visited.add(first);
-			while(!holeQue.isEmpty()) {
-				Pixel current = holeQue.poll();
-				for(Pixel n : neighbor(current,connectType,input.rows(), input.cols())) {
-					if(!visited.contains(n)) {
-						if (input.get(n.row(), n.col())[0] < 0) { //Neighbor is missing pixel 
-							hole.add(n);
-							holeQue.add(n);
-							visited.add(n);
-						}
-						else { //Neighbor is colored pixel - so its in the border of the hole
-							borders.add(n); 
-							visited.add(n);
-						}
+	public static void findHoleNBoundries(Mat input, Set<Pixel> hole, Set<Pixel> borders, int connectType) {
+		Pixel first = findFirstHole(input);
+		if(first.equals(-1,-1)) return; //No need to repaint 
+		hole.add(first);
+		Set<Pixel> visited = new HashSet(); //All visited pixels to avoid duplicate scanning
+		Queue<Pixel> holeQue = new LinkedList<>(); //Pixels that in scanning process 
+		holeQue.add(first);
+		visited.add(first);
+		while(!holeQue.isEmpty()) {
+			Pixel current = holeQue.poll();
+			for(Pixel n : neighbor(current,connectType,input.rows(), input.cols())) {
+				if(!visited.contains(n)) {
+					if (input.get(n.row(), n.col())[0] < 0) { //Neighbor is missing pixel 
+						hole.add(n);
+						holeQue.add(n);
+						visited.add(n);
+					}
+					else { //Neighbor is colored pixel - so its in the border of the hole
+						borders.add(n); 
+						visited.add(n);
 					}
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Initialize the 'hole' and 'inner-border' pixel's group.
+	 * Definitions:
+	 * 'hole' : set of all missing pixels, that are only surrounded by missing pixels		
+	 * 'inner-border' : set of all missing pixels that connected to at least one painted pixel.
+	 *  
+	 * 
+	 * @param input Mat
+	 * @param hole Set<Pixel>
+	 * @param borders Set<Pixel>
+	 * @param connectType int
+	 */
+	public static void findHoleNInnerBound(Mat input, Set<Pixel> hole, Map<Pixel,List<Pixel>> innerBord, int connectType) {
+		Set<Pixel> visited = new HashSet();
+		for (int i = 0; i < input.rows(); i++) {
+			for (int j = 0; j < input.cols(); j++) {
+				if(input.get(i, j)[0] < 0) { //if it's a missing pixel
+					Pixel current = new Pixel(i,j);
+					List<Pixel> colorNeig = colorNeighbor(current,connectType,input);
+					if(colorNeig.size()>0) { //Current lying on the inner border
+						innerBord.put(current, colorNeig);
+					} else {
+						hole.add(current);
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Iterates over the image and find the first missing-pixel
@@ -106,6 +114,7 @@ public class HoleFinder {
 		ArrayList<Pixel> neig = new ArrayList<>();
 		int r = current.row();
 		int c = current.col();
+		//First for each edge-connected pixel:
 		int[][] indexes = {{r+1,c}, {r-1,c}, {r,c+1}, {r,c-1}};
 		for (int i = 0; i < indexes.length; i++) {
 			int newRowIndex = indexes[i][0];
@@ -115,7 +124,7 @@ public class HoleFinder {
 				neig.add(borderPix);
 			}
 		}
-
+		//Later if connectivity-type is 8: add the corners-pixels
 		if(connectType == 8) {//Add corners
 			int [][] cornerIdx = {{r+1,c+1}, {r-1,c-1}, {r+1,c-1}, {r-1,c+1}};
 			for (int i = 0; i < cornerIdx.length; i++) {
@@ -124,6 +133,44 @@ public class HoleFinder {
 				Pixel borderPix = new Pixel(newRowIndex, newColIndex);
 				if(!outOfImageBorders(borderPix, height, width)) {
 					neig.add(borderPix);
+				}
+			}
+		}
+		return neig;
+	}
+
+	/**
+	 * Find only colored neighbor
+	 * @param current
+	 * @param connectType
+	 * @param input
+	 * @return
+	 */
+	public static ArrayList<Pixel> colorNeighbor(Pixel current, int connectType, Mat input) {
+		ArrayList<Pixel> neig = new ArrayList<>();
+		int r = current.row();
+		int c = current.col();
+		int[][] indexes = {{r+1,c}, {r-1,c}, {r,c+1}, {r,c-1}};
+		//First for each edge-connected pixel:
+		for (int i = 0; i < indexes.length; i++) {
+			int newRowIndex = indexes[i][0];
+			int newColIndex = indexes[i][1];
+			Pixel borderPix = new Pixel(newRowIndex, newColIndex);
+			if(!outOfImageBorders(borderPix, input.rows(), input.width())) {
+				if(input.get(newRowIndex, newColIndex)[0] > 0) //If the pixel colored
+					neig.add(borderPix);
+			}
+		}
+		//Later if connectivity-type is 8: add the corners-pixels
+		if(connectType == 8) {
+			int [][] cornerIdx = {{r+1,c+1}, {r-1,c-1}, {r+1,c-1}, {r-1,c+1}};
+			for (int i = 0; i < cornerIdx.length; i++) {
+				int newRowIndex = cornerIdx[i][0];
+				int newColIndex = cornerIdx[i][1];
+				Pixel borderPix = new Pixel(newRowIndex, newColIndex);
+				if(!outOfImageBorders(borderPix, input.rows(), input.width())) {
+					if(input.get(newRowIndex, newColIndex)[0] > 0) //If the pixel colored
+						neig.add(borderPix);
 				}
 			}
 		}
