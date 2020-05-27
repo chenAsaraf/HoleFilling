@@ -76,35 +76,40 @@ public class HoleFillerAprox extends Filler{
 	}
 
 	/**
-	 * Iterates over the rest of the missing pixels and select the ones that have a new
-	 * painted neighbor from the last algorithm's step.
+	 * Find new inner-border set. The new pixels in the border will be
+	 * in the neighborhood of new painted pixels (last inner-border set).
+	 * Iterates over the last inner-border set and select the missing neighbor pixels.
 	 */
 	private void findNewInnerBorder() {
+		Set<Pixel> visited = new HashSet();
 		Map<Pixel,List<Pixel>> newInnerBorder = new HashMap<>();
 		Iterator<Pixel> iter = innerBorder.keySet().iterator();
 		while (iter.hasNext()) {
 			Pixel colored = iter.next();
 			List<Pixel> missingNeig = HoleFinder.unColorNeighbor(colored,connectType,input);
 			for (Pixel missing : missingNeig) {
-				List<Pixel> colorNeig = HoleFinder.colorNeighbor(missing,connectType,input);
-				newInnerBorder.put(missing, colorNeig);
-				hole.remove(missing);
+				if(!visited.contains(missing)) {
+					List<Pixel> colorNeig = HoleFinder.colorNeighbor(missing,connectType,input);
+					newInnerBorder.put(missing, colorNeig);
+					hole.remove(missing);
+					visited.add(missing);
+				}
 			}
 		}
 		innerBorder = newInnerBorder;
 	}
 
 
-/**
- * Set new value to hole pixel in the image
- * @param h hole Pixel
- * @param sumWithValues
- * @param sumDistances
- */
-private void setValue(Pixel h, float sumWithValues, float sumDistances) {
-	float data = sumWithValues/ sumDistances;
-	input.put(h.row(), h.col(), data);
-}
+	/**
+	 * Set new value to hole pixel in the image
+	 * @param h hole Pixel
+	 * @param sumWithValues
+	 * @param sumDistances
+	 */
+	private void setValue(Pixel h, float sumWithValues, float sumDistances) {
+		float data = sumWithValues/ sumDistances;
+		input.put(h.row(), h.col(), data);
+	}
 
 
 
