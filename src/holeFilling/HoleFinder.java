@@ -73,7 +73,6 @@ public class HoleFinder{
 	 * @param connectType int
 	 */
 	public static void findHoleNInnerBound(Mat input, Set<Pixel> hole, Map<Pixel,List<Pixel>> innerBord, int connectType) {
-		Set<Pixel> visited = new HashSet();
 		for (int i = 0; i < input.rows(); i++) {
 			for (int j = 0; j < input.cols(); j++) {
 				if(input.get(i, j)[0] < 0) { //if it's a missing pixel

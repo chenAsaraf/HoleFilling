@@ -75,13 +75,15 @@ Initialize :
 		
 Fill innerBorder iteration:
 6. While hole is not empty: 
-	7. Fill the innerBorder pixels using only the pixels in its neighbors list //O(1) for each pixel 
-	8. Clean innerBorder
-	9. for each pixel p in the  hole: //O(n-|innerBorder|) 
-		10. Create a list of all p neighbors that are not missing
-		11. If neighborhood size > 0:
-			12. innerBorder add(p,neighborhood)
-			13. remove p from the hole
-		 
+	7. Fill the innerBorder pixels using only the pixels in its neighbors list //O(|innerBorder|) 
+	8. Create new HashMap for newBorder 
+	9. for each pixel B in the innerBorder: //O(|innerBorder|) 
+		10. Create a list of all B neighbors that are MISSING
+		11. for each missing pixel H in the neighborhood: //O(|Connectivity type|) = O(1)
+			12. If not visited yet:
+				13. Create a list of all H neighbors that are COLORED 
+				14. newBorder add(H,H.colored-neighbor)
+				15. remove H from the hole
+	16. innerBorder = newBorder
 
  
