@@ -30,7 +30,7 @@ described above.
 
 Answer:
 To achieve time complexity of O(n), we have to get rid of the inner loop through all
-the borders pixel. That is, we need to execute for each missing-pixel a fix number
+the borders pixels. That is, we need to execute for each missing-pixel a fix number
 of actions that do not depends on the number of pixels in the border.
 
 First suggestion: 
@@ -55,8 +55,10 @@ the effect of the pixels closest to it is highest, so we can "abandon" the pixel
 far border. So high degree of accuracy achieved.
 
 Time complexity:
-Fill inner-border - O(|closest-pixels|*|inner-border|) = O(|inner-border|) 
-Find new inner-border: O(n-|last-inner-border|)
+Fill inner-border - O(|closest-pixels|*|inner-border|) = O(|inner-border|) = O(n)
++
+Find new inner-border: O(|last-inner-border|) + O(|last-inner-border|*|closest-pixels|)
+						=  O(|last-inner-border|) = O(n)
 In conclusion: O(n)
 
 PseudoCode:
