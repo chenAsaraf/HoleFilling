@@ -73,7 +73,7 @@ Initialize :
 			5. innerBorder add(current,neighborhood)
 		5. Else hole add(current)
 		
-Fill innerBorder iteration:9n
+Fill innerBorder iteration:
 6. While hole is not empty: 
 	7. Fill the innerBorder pixels using only the pixels in its neighbors list //O(1) for each pixel 
 	8. Clean innerBorder

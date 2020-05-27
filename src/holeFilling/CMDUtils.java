@@ -28,7 +28,7 @@ import org.opencv.imgcodecs.Imgcodecs;
  */
 
 public class CMDUtils {
-	
+
 	public static void main(String[] args) {
 		//Loading the OpenCV core library  
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); 
@@ -37,7 +37,10 @@ public class CMDUtils {
 		ParseArgsToObjects(args,conf);
 		System.out.println("arguments loaded");
 		//Start to fill and inpaint the hole in the image:
-		HoleFiller filler = new HoleFiller(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
+		//For Approximates algorithm:
+		//Filler filler = new HoleFillerAprox(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
+		//For naive algorithm:
+		Filler filler = new HoleFiller(conf.getZ(),conf.getEps(),conf.getInput(),conf.getConnectType());
 		Mat result = filler.fill();
 		//Write the new image:
 		String newfile = conf.getPathToOutputDir() +"/newfile.jpg";
@@ -45,7 +48,7 @@ public class CMDUtils {
 		System.out.println("image's hole repainted");
 	}
 
-	
+
 
 	/**
 	 * Auxiliary function to parse command line arguments and store the information 
@@ -120,7 +123,7 @@ public class CMDUtils {
 		imageCodecs.imwrite(file, img);
 	}
 
-	
+
 	//Create output folder to examine the results
 	private static String createOutputFolder(String path) {
 		String[] parts = path.split("/");
